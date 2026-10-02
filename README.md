@@ -1,6 +1,6 @@
 # C++ Video Inference System
 
-An original C++ video detection pipeline under development. The model comes from the existing UAV algorithm and PC TensorRT validation work; this repository focuses on single-frame parity, continuous video processing, bounded queues, and latency measurement.
+A C++ TensorRT video detection pipeline built for this project. The model comes from the existing UAV algorithm and PC TensorRT validation work; this repository focuses on single-frame parity, continuous video processing, bounded queues, and latency measurement.
 
 **Model availability:** The research ONNX model and TensorRT engine are not public while the related paper is unpublished. Neither is included in this repository. The recorded inference and performance results used that private model and cannot currently be reproduced by an outside reader. Running inference requires a locally available, compatible model and engine; the current executable expects the five-class input/output contract in [docs/model-contract.md](docs/model-contract.md). The build and source can be inspected without model files. A public-model demonstration would require a separately documented model and any necessary interface changes.
 
@@ -106,3 +106,7 @@ trtexec --onnx=C:\path\to\authorized-model.onnx --saveEngine=C:\path\to\compatib
 ```
 
 Use the actual `trtexec.exe` path if it is not on `PATH`. This command is for an authorized, compatible ONNX model; it does not provide the private research model. Validate the rebuilt engine against the matching Python reference before using it in the video pipeline.
+
+## References
+
+The project uses common TensorRT and video-pipeline techniques. [NVIDIA's TensorRT C++ samples](https://github.com/NVIDIA/TensorRT/tree/main/samples) were a reference for engine loading and execution APIs, and [TensorRT-YOLO's VideoPipe example](https://github.com/laugh12321/TensorRT-YOLO/tree/main/examples/VideoPipe) was a reference for video-pipeline structure. The implementation and measurements in this repository were developed for this project; the pipeline concept itself is not presented as a new algorithm.
