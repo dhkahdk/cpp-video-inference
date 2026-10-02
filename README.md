@@ -6,7 +6,7 @@ An original C++ video detection pipeline under development. The model comes from
 
 ## Current status
 
-**Milestone 8: sustained overload check.** The executable handles still images, sequential single-video files, and two local videos paced from their FPS metadata. Two producer threads feed one TensorRT consumer through an independent bounded queue per stream. A full queue drops its oldest waiting frame and records that decision in CSV. Per-frame CSV separates file decoding, frame handoff, queue wait, preprocessing, GPU transfers, pure GPU inference, postprocessing, drawing, and video writing. Each processed or dropped frame is written to CSV when its status is final; the program no longer retains every frame's record until exit. The producer transfers each decoded `cv::Mat` to the queue instead of cloning its pixels. A same-input before/after measurement and a 30-second, two-stream 40 FPS overload run are in [docs/validation.md](docs/validation.md).
+**Local validation complete; public-model demonstration pending.** The executable handles still images, sequential single-video files, and two local videos paced from their FPS metadata. Two producer threads feed one TensorRT consumer through an independent bounded queue per stream. A full queue drops its oldest waiting frame and records that decision in CSV. Per-frame CSV separates file decoding, frame handoff, queue wait, preprocessing, GPU transfers, pure GPU inference, postprocessing, drawing, and video writing. Each processed or dropped frame is written to CSV when its status is final; the program no longer retains every frame's record until exit. The producer transfers each decoded `cv::Mat` to the queue instead of cloning its pixels. A same-input before/after measurement and a 30-second, two-stream 40 FPS overload run are in [docs/validation.md](docs/validation.md).
 
 ## Model interface
 
@@ -29,14 +29,16 @@ cmake --build build --config Release
 
 The executable uses C++17, OpenCV, TensorRT 10, and the CUDA runtime. The build copies the matching OpenCV runtime DLL and FFmpeg videoio plugin beside the executable when present in the official Windows OpenCV package. Without that plugin, some AVI files may open but report unusable FPS metadata. TensorRT engines must be rebuilt for the target TensorRT version and GPU.
 
-## Run the current preprocessing check
+## Model-free preprocessing check
+
+This check runs after the C++ build without the private ONNX model or TensorRT engine. It generates a synthetic image locally and compares the C++ input tensor with the Python implementation. Python 3, NumPy, and `opencv-python` are needed for the comparison (`python -m pip install numpy opencv-python`). The generated image and tensor stay in ignored `outputs/`.
 
 ```powershell
-New-Item -ItemType Directory outputs -Force | Out-Null
-.\build\Release\video_infer.exe --input "C:\path\to\image.jpg" --dump-tensor "outputs\input.bin"
+python tests/make_smoke_image.py --output outputs/smoke.ppm
+python tests/compare_preprocess.py --exe build/Release/video_infer.exe outputs/smoke.ppm
 ```
 
-To compare its tensor with the Python validation preprocessing, run `python tests/compare_preprocess.py --exe build/Release/video_infer.exe path/to/image.jpg`. This requires Python, NumPy and OpenCV 4.13.
+The comparison passes when it prints `max_abs=0` and exits successfully. You can also inspect the generated tensor with `.\build\Release\video_infer.exe --input outputs\smoke.ppm --dump-tensor outputs\input.bin`. This checks image decoding and preprocessing only; video inference still requires a compatible TensorRT engine.
 
 To run one raw inference with the local FP16 engine:
 

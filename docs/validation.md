@@ -1,5 +1,9 @@
 # Local validation record
 
+## Public model-free check
+
+`python tests/make_smoke_image.py --output outputs/smoke.ppm` generated a local 971×543 synthetic image. On 2026-10-02, `python tests/compare_preprocess.py --exe build/Release/video_infer.exe outputs/smoke.ppm` reported `max_abs=0, mismatched=0` on the RTX 4060 Laptop GPU Windows build. This check requires no research model and can be repeated with the published code. It tests image decoding and preprocessing, not TensorRT inference or video throughput.
+
 Date: 2026-10-02. Hardware: RTX 4060 Laptop GPU. CUDA 12.4, TensorRT 10.11.0.33, C++ OpenCV 4.13.0. This record is for the initial single-image milestone, not a video performance result.
 
 Reference engine: private local FP16 TensorRT engine. Its file and hash are withheld while the related paper is unpublished.
